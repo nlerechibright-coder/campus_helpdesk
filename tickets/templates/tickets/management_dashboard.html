@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block title %}Management Dashboard - Campus Help Desk{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">Management Dashboard</h1>
+            <p class="text-gray-500 mt-1">Overview of all campus help desk activity.</p>
+        </div>
+        <div class="flex gap-3">
+            <a href="{% url 'tickets:management_reports' %}" class="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-900 transition shadow-sm font-medium flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                View Reports
+            </a>
+            <a href="{% url 'tickets:create_staff' %}" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition shadow-sm font-medium flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                Create Staff Account
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 class="text-sm font-medium text-gray-500 uppercase">Total Tickets</h3>
+            <p class="text-3xl font-bold text-gray-900 mt-2">{{ total_tickets }}</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-gray-400">
+            <h3 class="text-sm font-medium text-gray-500 uppercase">Submitted</h3>
+            <p class="text-3xl font-bold text-gray-700 mt-2">{{ submitted_tickets }}</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-yellow-400">
+            <h3 class="text-sm font-medium text-gray-500 uppercase">In Progress</h3>
+            <p class="text-3xl font-bold text-yellow-600 mt-2">{{ in_progress_tickets }}</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-green-400">
+            <h3 class="text-sm font-medium text-gray-500 uppercase">Resolved/Closed</h3>
+            <p class="text-3xl font-bold text-green-600 mt-2">{{ resolved_tickets }}</p>
+        </div>
+    </div>
+
+    <!-- Ticket List & Search -->
+    <div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+        <div class="p-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <h2 class="text-lg font-bold text-gray-900">All Tickets</h2>
+            <form method="get" class="flex gap-2">
+                <input type="text" name="search" value="{{ search_query }}" placeholder="Search ticket #, subject, or student..." 
+                       class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none w-64">
+                <button type="submit" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primaryDark transition font-medium">Search</button>
+                {% if search_query %}
+                    <a href="{% url 'tickets:management_dashboard' %}" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Clear</a>
+                {% endif %}
+            </form>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ticket #</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for ticket in tickets %}
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-primary">
+                            <a href="{% url 'tickets:management_ticket_detail' ticket.pk %}" class="hover:underline font-bold">{{ ticket.ticket_number }}</a>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ ticket.student.username }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">{{ ticket.subject }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ ticket.department.name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                {% if ticket.status == 'SUBMITTED' %}bg-gray-100 text-gray-800
+                                {% elif ticket.status == 'UNDER_REVIEW' %}bg-blue-100 text-blue-800
+                                {% elif ticket.status == 'ASSIGNED' %}bg-indigo-100 text-indigo-800
+                                {% elif ticket.status == 'IN_PROGRESS' %}bg-yellow-100 text-yellow-800
+                                {% elif ticket.status == 'RESOLVED' %}bg-green-100 text-green-800
+                                {% elif ticket.status == 'CLOSED' %}bg-gray-800 text-gray-100
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ ticket.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ ticket.created_at|date:"M d, Y" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                            No tickets found matching your search.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Campus Help Desk{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        primaryDark: '#1d4ed8',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
+    <nav class="bg-primary text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col sm:flex-row justify-between h-auto sm:h-16 py-3 sm:py-0 items-center gap-4 sm:gap-0">
+                <a href="/" class="text-xl font-bold tracking-wide flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    Campus Help Desk
+                </a>
+                
+                <div class="flex flex-col sm:flex-row items-center gap-4">
+                    {% if user.is_authenticated %}
+                        <!-- Role-Aware Navigation Links -->
+                        <div class="flex items-center gap-3 text-sm font-medium">
+                            {% if user.role == 'STUDENT' %}
+                                <a href="{% url 'tickets:ticket_list' %}" class="hover:text-gray-200 transition px-2 py-1 rounded">My Tickets</a>
+                                <a href="{% url 'tickets:create_ticket' %}" class="bg-white text-primary px-3 py-1.5 rounded-md font-semibold hover:bg-gray-100 transition shadow-sm">+ Submit New</a>
+                            {% elif user.role == 'STAFF' %}
+                                <a href="{% url 'tickets:staff_dashboard' %}" class="hover:text-gray-200 transition px-2 py-1 rounded">Staff Dashboard</a>
+                            {% elif user.role == 'MANAGEMENT' %}
+                                <a href="{% url 'tickets:management_dashboard' %}" class="hover:text-gray-200 transition px-2 py-1 rounded">Dashboard</a>
+                                <a href="{% url 'tickets:management_reports' %}" class="hover:text-gray-200 transition px-2 py-1 rounded">Reports</a>
+                                <a href="{% url 'tickets:create_staff' %}" class="bg-purple-600 text-white px-3 py-1.5 rounded-md font-semibold hover:bg-purple-700 transition shadow-sm">+ Create Staff</a>
+                            {% endif %}
+                        </div>
+
+                        <!-- User Info & Logout -->
+                        <div class="flex items-center gap-3 border-l border-blue-400 pl-4">
+                            <span class="text-xs font-medium bg-primaryDark px-3 py-1 rounded-full hidden sm:inline-block">
+                                {{ user.username }} ({{ user.get_role_display }})
+                            </span>
+                            <form action="{% url 'accounts:logout' %}" method="post" class="inline">
+                                {% csrf_token %}
+                                <button type="submit" class="text-xs bg-white text-primary px-3 py-1.5 rounded-md font-semibold hover:bg-gray-100 transition">Logout</button>
+                            </form>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'accounts:login' %}" class="text-sm font-semibold hover:text-gray-200 transition px-2 py-1">Login</a>
+                        <a href="{% url 'accounts:register' %}" class="text-sm bg-white text-primary px-4 py-2 rounded-md font-semibold hover:bg-gray-100 transition shadow-sm">Register</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        {% if messages %}
+            <div class="mb-6 space-y-3">
+                {% for message in messages %}
+                    <div class="p-4 rounded-md border-l-4 shadow-sm 
+                        {% if message.tags == 'error' %}bg-red-50 border-red-500 text-red-700
+                        {% elif message.tags == 'success' %}bg-green-50 border-green-500 text-green-700
+                        {% else %}bg-blue-50 border-blue-500 text-blue-700{% endif %}">
+                        <p class="text-sm font-medium">{{ message }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 py-6 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center text-gray-500 text-sm">
+            &copy; {% now "Y" %} Campus Help Desk System. All rights reserved.
+        </div>
+    </footer>
+</body>
+</html>

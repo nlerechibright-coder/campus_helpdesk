@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block title %}Reports & Analytics - Campus Help Desk{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-8 gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">Reports & Analytics</h1>
+            <p class="text-gray-500 mt-1">Actionable insights into help desk performance.</p>
+        </div>
+        
+        <!-- Date Range Filter -->
+        <form method="get" class="flex gap-2 bg-white p-2 rounded-lg border border-gray-200 shadow-sm">
+            <select name="date_filter" class="px-3 py-1 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-primary outline-none">
+                <option value="all" {% if date_filter == 'all' %}selected{% endif %}>All Time</option>
+                <option value="7days" {% if date_filter == '7days' %}selected{% endif %}>Last 7 Days</option>
+                <option value="30days" {% if date_filter == '30days' %}selected{% endif %}>Last 30 Days</option>
+            </select>
+            <button type="submit" class="bg-primary text-white px-4 py-1 rounded-md text-sm font-medium hover:bg-primaryDark transition">Apply</button>
+            <a href="{% url 'tickets:management_dashboard' %}" class="px-4 py-1 text-sm text-gray-600 hover:text-gray-900 flex items-center">Back to Dashboard</a>
+        </form>
+    </div>
+
+    <!-- Top Level Metrics -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 class="text-sm font-medium text-gray-500 uppercase">Total Tickets (Period)</h3>
+            <p class="text-4xl font-bold text-gray-900 mt-2">{{ total_tickets }}</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-green-400">
+            <h3 class="text-sm font-medium text-gray-500 uppercase">Avg. Resolution Time</h3>
+            <p class="text-4xl font-bold text-green-600 mt-2">{{ avg_resolution_hours }} <span class="text-lg text-gray-500 font-normal">hours</span></p>
+            <p class="text-xs text-gray-400 mt-1">Based on {{ resolved_count }} resolved tickets</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 class="text-sm font-medium text-gray-500 uppercase">Active Departments</h3>
+            <p class="text-4xl font-bold text-primary mt-2">{{ dept_counts|length }}</p>
+        </div>
+    </div>
+
+    <!-- Breakdown Charts (Visualized as Progress Bars) -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <!-- Tickets by Status -->
+        <div class="bg-white rounded-xl shadow-md border border-gray-100 p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-6">Tickets by Status</h2>
+            <div class="space-y-4">
+                {% for item in status_counts %}
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span class="font-medium text-gray-700">
+                                {% if item.status == 'SUBMITTED' %}Submitted
+                                {% elif item.status == 'UNDER_REVIEW' %}Under Review
+                                {% elif item.status == 'ASSIGNED' %}Assigned
+                                {% elif item.status == 'IN_PROGRESS' %}In Progress
+                                {% elif item.status == 'RESOLVED' %}Resolved
+                                {% elif item.status == 'CLOSED' %}Closed
+                                {% else %}{{ item.status }}{% endif %}
+                            </span>
+                            <span class="font-bold text-gray-900">{{ item.count }}</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="bg-primary h-2.5 rounded-full" style="width: {% widthratio item.count total_tickets 100 %}%"></div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p class="text-gray-500 italic text-sm">No data for this period.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Tickets by Department -->
+        <div class="bg-white rounded-xl shadow-md border border-gray-100 p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-6">Tickets by Department</h2>
+            <div class="space-y-4">
+                {% for item in dept_counts %}
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span class="font-medium text-gray-700">{{ item.department__name }}</span>
+                            <span class="font-bold text-gray-900">{{ item.count }}</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="bg-purple-500 h-2.5 rounded-full" style="width: {% widthratio item.count total_tickets 100 %}%"></div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p class="text-gray-500 italic text-sm">No data for this period.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Staff Dashboard - Campus Help Desk{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto text-center py-12">
+    <div class="bg-blue-100 p-6 rounded-full inline-block mb-6">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        </svg>
+    </div>
+    <h1 class="text-3xl font-bold text-gray-900 mb-4">Staff Dashboard</h1>
+    <p class="text-lg text-gray-600 mb-8">Welcome, {{ user.username }}. The staff dashboard for viewing assigned tickets and updating progress will be built in Phase 6.</p>
+    <a href="{% url 'accounts:logout' %}" class="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primaryDark transition shadow-md font-semibold">Logout</a>
+</div>
+{% endblock %}
